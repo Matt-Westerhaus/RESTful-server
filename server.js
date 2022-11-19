@@ -5,6 +5,7 @@ let path = require('path');
 // NPM modules
 let express = require('express');
 let sqlite3 = require('sqlite3');
+const { query } = require('express');
 
 
 let db_filename = path.join(__dirname, 'db', 'stpaul_crime.sqlite3');
@@ -30,8 +31,15 @@ let db = new sqlite3.Database(db_filename, sqlite3.OPEN_READWRITE, (err) => {
 // GET request handler for crime codes
 app.get('/codes', (req, res) => {
     console.log(req.query); // query object (key-value pairs after the ? in the url)
+    let query_object = {};
+    if(req.query.hasOwnProperty("codes")){
+        for(let i=0; i<req.query.length; i++){
+            query_object[req.query[0]] = req.query[1];
+            console.log(query_object);
+        }
+    }
     
-    res.status(200).type('json').send({}); // <-- you will need to change this
+    res.status(200).type('json').send(query_object); // <-- you will need to change this
 });
 
 // GET request handler for neighborhoods
