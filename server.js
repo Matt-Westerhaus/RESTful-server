@@ -44,22 +44,46 @@ app.get('/codes', (req, res) => {
                 }
             }
         }
+        query = query + " ORDER BY code";
     }
+
     databaseSelect(query, [])
     .then((data) => {
         console.log(data);
         res.status(200).type('json').send(data); // <-- you will need to change this
     })
     .catch((err) => {
-        console.log("whoops");
+        res.status(200).type('html').send("Make sure that your requested codes are in csv format. E.g. ?codes=110,120,432,620"); // <-- you will need to change this
     })
 });
 
 // GET request handler for neighborhoods
 app.get('/neighborhoods', (req, res) => {
-    console.log(req.query); // query object (key-value pairs after the ? in the url)
-    
-    res.status(200).type('json').send({}); // <-- you will need to change this
+    let query = "SELECT * FROM Neighborhoods";
+    //console.log(req.query); // query object (key-value pairs after the ? in the url)
+    let query_object = {};
+    let clause = " WHERE neighborhood_number = ";
+    if(req.query.hasOwnProperty("id")){
+        for (const [key, value] of Object.entries(req.query)) {
+            if(key == "id"){
+                let new_values = value.split(",");
+                for(let i=0; i<new_values.length; i++){
+                    query = query + clause + new_values[i];
+                    clause = " OR neighborhood_number = ";
+                }
+            }
+        }
+        query = query + " ORDER BY neighborhood_number";
+    }
+
+    databaseSelect(query, [])
+    .then((data) => {
+        console.log(data);
+        res.status(200).type('json').send(data); // <-- you will need to change this
+    })
+    .catch((err) => {
+        res.status(200).type('html').send("Make sure that your requested codes are in csv format. E.g. ?codes=110,120,432,620"); // <-- you will need to change this
+    })
 });
 
 // GET request handler for crime incidents

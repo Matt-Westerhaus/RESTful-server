@@ -1,6 +1,29 @@
 {
+  "name": "RESTful-API",
+  "version": "0.0.0",
+  "description": "RESTful API Server using Node JS",
+  "author": {
+      "name": "Matt Westerhaus",
+      "email": "west1114@stthomas.edu"
+  },
+  "contributors": [
+      {
+          "name": "Nolan Foy",
+          "email": "foy06497@stthomas.edu"
+      },
+      {
+          "name": "Owen Xiong",
+          "email": ""
+      }
+  ],
+  "main": "server.js",
+  "repository": {
+      "type": "git",
+      "url": "https://github.com/Matt-Westerhaus/RESTful-server"
+  },
   "dependencies": {
     "express": "^4.18.2",
+    "expresss": "^0.0.0",
     "node": "^19.1.0",
     "sqlite3": "^5.1.2"
   }
