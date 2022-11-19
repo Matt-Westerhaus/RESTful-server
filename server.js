@@ -30,16 +30,29 @@ let db = new sqlite3.Database(db_filename, sqlite3.OPEN_READWRITE, (err) => {
 
 // GET request handler for crime codes
 app.get('/codes', (req, res) => {
-    console.log(req.query); // query object (key-value pairs after the ? in the url)
+    let query = "SELECT * FROM Codes";
+    //console.log(req.query); // query object (key-value pairs after the ? in the url)
     let query_object = {};
+    let clause = " WHERE code = ";
     if(req.query.hasOwnProperty("codes")){
-        for(let i=0; i<req.query.length; i++){
-            query_object[req.query[0]] = req.query[1];
-            console.log(query_object);
+        for (const [key, value] of Object.entries(req.query)) {
+            if(key == "codes"){
+                let new_values = value.split(",");
+                for(let i=0; i<new_values.length; i++){
+                    query = query + clause + new_values[i];
+                    clause = " OR code = ";
+                }
+            }
         }
     }
-    
-    res.status(200).type('json').send(query_object); // <-- you will need to change this
+    databaseSelect(query, [])
+    .then((data) => {
+        console.log(data);
+        res.status(200).type('json').send(data); // <-- you will need to change this
+    })
+    .catch((err) => {
+        console.log("whoops");
+    })
 });
 
 // GET request handler for neighborhoods
