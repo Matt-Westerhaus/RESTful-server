@@ -90,9 +90,9 @@ app.get('/incidents', (req, res) => {
 
     for (const [key, value] of Object.entries(req.query)) {
         if(key == "start_date"){
-
             query = query + clause + "date(date_time) >= " + "'" + value + "'";
             clause = ") AND (";
+
         } else if(key == "end_date"){
             query = query + clause + "date(date_time) <= " + "'" + value + "'";
             clause = ") AND (";
@@ -104,6 +104,7 @@ app.get('/incidents', (req, res) => {
                 clause = " OR ";
             }
             clause = ") AND ("
+
         } else if(key == "grid"){
             new_values = value.split(",");
             for(i=0; i<new_values.length; i++){
@@ -111,19 +112,21 @@ app.get('/incidents', (req, res) => {
                 clause = " OR ";
             }
             clause = ") AND ("
+
         } else if(key == "neighborhood"){
             new_values = value.split(",");
             for(i=0; i<new_values.length; i++){
                 query = query + clause + "neighborhood_number = " +  new_values[i];
                 clause = " OR ";
             }
+            
         } else if(key == "limit"){
             limit = value;
         }        
     }
 
-    if(Object.keys(req.query).length == null) {
-        query = "SELECT * FROM incidents ORDER BY date_time ASC LIMIT 50";
+    if(clause == " WHERE (" || req.query.hasOwnProperty("limit")) {
+        query = "SELECT * FROM incidents ORDER BY date_time ASC LIMIT " + limit;
     } else {
         query = query + ") ORDER BY date_time ASC LIMIT " + limit;
     }    
@@ -134,7 +137,7 @@ app.get('/incidents', (req, res) => {
         res.status(200).type('json').send(data); 
     })
     .catch((err) => {
-        res.status(200).type('html').send("Make sure that your requested parameyers are in csv format. (E.g: ?code=5,8,10"); // <-- you will need to change this
+        res.status(200).type('html').send("Make sure that your requested parameyers are in csv format. (E.g: ?code=5,8,10)"); // <-- you will need to change this
     })
 });
 
