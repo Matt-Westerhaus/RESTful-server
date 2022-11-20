@@ -126,8 +126,7 @@ app.get('/incidents', (req, res) => {
         }        
     }
 
-
-    if(clause == " WHERE (" && req.query.hasOwnProperty("limit")) {
+    if((clause == " WHERE (" && req.query.hasOwnProperty("limit")) || clause == " WHERE (") {
         query = "SELECT case_number, SUBSTRING(date_time,1,10) AS date, SUBSTRING(date_time,12,19) AS time, code, incident, police_grid, neighborhood_number, block FROM incidents ORDER BY date ASC, time LIMIT " + limit;
     } else {
         query = query + ") ORDER BY date ASC, time LIMIT " + limit;
@@ -138,7 +137,7 @@ app.get('/incidents', (req, res) => {
         res.status(200).type('json').send(data); 
     })
     .catch((err) => {
-        res.status(200).type('html').send("Make sure that your requested parameyers are in csv format. (E.g: ?code=5,8,10)"); 
+        res.status(500).type('html').send("Make sure that your requested parameyers are in csv format. (E.g: ?code=5,8,10)"); 
     })
 });
 
