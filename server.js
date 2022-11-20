@@ -81,8 +81,8 @@ app.get('/neighborhoods', (req, res) => {
 
 // GET request handler for crime incidents
 app.get('/incidents', (req, res) => {
-    console.log(req.query); // query object (key-value pairs after the ? in the url)
-    let query = "SELECT * FROM incidents";
+    console.log(req.query); // query object 
+    let query = "SELECT case_number, SUBSTRING(date_time,1,10) AS date, SUBSTRING(date_time,12,19) AS time, code, incident, police_grid, neighborhood_number, block FROM incidents";
     let limit = 50;
     let clause = " WHERE (";
     let new_values
@@ -90,11 +90,11 @@ app.get('/incidents', (req, res) => {
 
     for (const [key, value] of Object.entries(req.query)) {
         if(key == "start_date"){
-            query = query + clause + "date(date_time) >= " + "'" + value + "'";
+            query = query + clause + "date(date) >= " + "'" + value + "'";
             clause = ") AND (";
 
         } else if(key == "end_date"){
-            query = query + clause + "date(date_time) <= " + "'" + value + "'";
+            query = query + clause + "date(date) <= " + "'" + value + "'";
             clause = ") AND (";
 
         } else if(key == "code"){
@@ -119,44 +119,61 @@ app.get('/incidents', (req, res) => {
                 query = query + clause + "neighborhood_number = " +  new_values[i];
                 clause = " OR ";
             }
+            clause = ") AND (";
             
         } else if(key == "limit"){
             limit = value;
         }        
     }
 
-    if(clause == " WHERE (" || req.query.hasOwnProperty("limit")) {
-        query = "SELECT * FROM incidents ORDER BY date_time ASC LIMIT " + limit;
+
+    if(clause == " WHERE (" && req.query.hasOwnProperty("limit")) {
+        query = "SELECT case_number, SUBSTRING(date_time,1,10) AS date, SUBSTRING(date_time,12,19) AS time, code, incident, police_grid, neighborhood_number, block FROM incidents ORDER BY date ASC, time LIMIT " + limit;
     } else {
-        query = query + ") ORDER BY date_time ASC LIMIT " + limit;
+        query = query + ") ORDER BY date ASC, time LIMIT " + limit;
     }    
     console.log(query);
     databaseSelect(query, [])
     .then((data) => {
-        console.log(data);
         res.status(200).type('json').send(data); 
     })
     .catch((err) => {
-        res.status(200).type('html').send("Make sure that your requested parameyers are in csv format. (E.g: ?code=5,8,10)"); // <-- you will need to change this
+        res.status(200).type('html').send("Make sure that your requested parameyers are in csv format. (E.g: ?code=5,8,10)"); 
     })
 });
 
 
-//TODO STILL: 2 FUNCTIONS BELOW && PUT DATE AND TIME IN TWO SEPERATE COLUMNS 
+//TODO STILL: 2 FUNCTIONS BELOW 
 
 
 // PUT request handler for new crime incident
 app.put('/new-incident', (req, res) => {
     console.log(req.body); // uploaded data
-    
-    res.status(200).type('txt').send('OK'); // <-- you may need to change this
+
+    let query = "INSERT INTO incidents (case_number, date_time, code, incident, police_grid, neighborhood_number, block) \
+    VALUES (CASE_NUMBER, *DATE+TIME*, CODE, INCIDENT, POLICE_GRID, NEIGHBORHOOD_NUMBER, BLOCK) ";
+
+    databaseRun(query, []) 
+    .then((data) => {
+        res.status(200).type('txt').send('Success'); // <-- you may need to change this
+    })
+    .catch((err) => {
+        res.status(500).type('txt').send('Error: Already in Database'); // <-- you may need to change this
+    })
 });
 
-// DELETE request handler for new crime incident
+// DELETE request handler for crime incident
 app.delete('/remove-incident', (req, res) => {
     console.log(req.body); // uploaded data
-    
-    res.status(200).type('txt').send('OK'); // <-- you may need to change this
+    let query = "DELETE FROM incidents WHERE case_number = CASE_NUMBER_INPUT";
+
+    databaseRun(query, []) 
+    .then((data) => {
+        res.status(200).type('txt').send('Success'); // <-- you may need to change this
+    })
+    .catch((err) => {
+        res.status(500).type('txt').send('Error: case number does not exist in the database'); // <-- you may need to change this
+    })
 });
 
 
