@@ -67,7 +67,7 @@ app.get('/neighborhoods', (req, res) => {
             }
         }
     }
-    query = query + " ORDER BY neighborhood_number";
+    query = query + " ORDER BY neighborhood_number ASC";
 
     databaseSelect(query, [])
     .then((data) => {
@@ -87,8 +87,6 @@ app.get('/incidents', (req, res) => {
     let clause = " WHERE (";
     let new_values
     let i;
-
-
 
     for (const [key, value] of Object.entries(req.query)) {
         if(key == "start_date"){
@@ -121,13 +119,14 @@ app.get('/incidents', (req, res) => {
             }
         } else if(key == "limit"){
             limit = value;
-        }
-        
+        }        
     }
 
-    
-    query = query + ") ORDER BY date_time ASC LIMIT " + limit;
-    //query = "SELECT * FROM incidents where date(date_time) > '2022-01-02' ORDER BY date_time ASC LIMIT 15";
+    if(Object.keys(req.query).length == null) {
+        query = "SELECT * FROM incidents ORDER BY date_time ASC LIMIT 50";
+    } else {
+        query = query + ") ORDER BY date_time ASC LIMIT " + limit;
+    }    
     console.log(query);
     databaseSelect(query, [])
     .then((data) => {
@@ -135,10 +134,13 @@ app.get('/incidents', (req, res) => {
         res.status(200).type('json').send(data); 
     })
     .catch((err) => {
-        res.status(200).type('html').send(err); // <-- you will need to change this
-        //res.status(200).type('html').send("Make sure that your requested neighborhoods are in csv format. (E.g: ?codes=5,8,10"); // <-- you will need to change this
+        res.status(200).type('html').send("Make sure that your requested parameyers are in csv format. (E.g: ?code=5,8,10"); // <-- you will need to change this
     })
 });
+
+
+//TODO STILL: 2 FUNCTIONS BELOW && PUT DATE AND TIME IN TWO SEPERATE COLUMNS 
+
 
 // PUT request handler for new crime incident
 app.put('/new-incident', (req, res) => {
