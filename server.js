@@ -31,66 +31,113 @@ let db = new sqlite3.Database(db_filename, sqlite3.OPEN_READWRITE, (err) => {
 // GET request handler for crime codes
 app.get('/codes', (req, res) => {
     let query = "SELECT * FROM Codes";
-    //console.log(req.query); // query object (key-value pairs after the ? in the url)
-    let query_object = {};
     let clause = " WHERE code = ";
-    if(req.query.hasOwnProperty("codes")){
-        for (const [key, value] of Object.entries(req.query)) {
-            if(key == "codes"){
-                let new_values = value.split(",");
-                for(let i=0; i<new_values.length; i++){
-                    query = query + clause + new_values[i];
-                    clause = " OR code = ";
-                }
+    for (const [key, value] of Object.entries(req.query)) {
+        if(key == "code"){
+            let new_values = value.split(",");
+            for(let i=0; i<new_values.length; i++){
+                query = query + clause + new_values[i];
+                clause = " OR code = ";
             }
         }
-        query = query + " ORDER BY code";
     }
+    query = query + " ORDER BY code";
+    
 
     databaseSelect(query, [])
     .then((data) => {
         console.log(data);
-        res.status(200).type('json').send(data); // <-- you will need to change this
+        res.status(200).type('json').send(data); 
     })
     .catch((err) => {
-        res.status(200).type('html').send("Make sure that your requested codes are in csv format. E.g. ?codes=110,120,432,620"); // <-- you will need to change this
+        res.status(200).type('html').send("Make sure that your requested codes are in csv format. E.g. ?codes=110,120,432,620");
     })
 });
 
 // GET request handler for neighborhoods
 app.get('/neighborhoods', (req, res) => {
     let query = "SELECT * FROM Neighborhoods";
-    //console.log(req.query); // query object (key-value pairs after the ? in the url)
-    let query_object = {};
     let clause = " WHERE neighborhood_number = ";
-    if(req.query.hasOwnProperty("id")){
-        for (const [key, value] of Object.entries(req.query)) {
-            if(key == "id"){
-                let new_values = value.split(",");
-                for(let i=0; i<new_values.length; i++){
-                    query = query + clause + new_values[i];
-                    clause = " OR neighborhood_number = ";
-                }
+    for (const [key, value] of Object.entries(req.query)) {
+        if(key == "id"){
+            let new_values = value.split(",");
+            for(let i=0; i<new_values.length; i++){
+                query = query + clause + new_values[i];
+                clause = " OR neighborhood_number = ";
             }
         }
-        query = query + " ORDER BY neighborhood_number";
     }
+    query = query + " ORDER BY neighborhood_number";
 
     databaseSelect(query, [])
     .then((data) => {
         console.log(data);
-        res.status(200).type('json').send(data); // <-- you will need to change this
+        res.status(200).type('json').send(data); 
     })
     .catch((err) => {
-        res.status(200).type('html').send("Make sure that your requested codes are in csv format. E.g. ?codes=110,120,432,620"); // <-- you will need to change this
+        res.status(200).type('html').send("Make sure that your requested neighborhoods are in csv format. (E.g: ?codes=5,8,10");
     })
 });
 
 // GET request handler for crime incidents
 app.get('/incidents', (req, res) => {
     console.log(req.query); // query object (key-value pairs after the ? in the url)
+    let query = "SELECT * FROM incidents";
+    let limit = 50;
+    let clause = " WHERE (";
+    let new_values
+    let i;
+
+
+
+    for (const [key, value] of Object.entries(req.query)) {
+        if(key == "start_date"){
+
+            query = query + clause + "date(date_time) >= " + "'" + value + "'";
+            clause = ") AND (";
+        } else if(key == "end_date"){
+            query = query + clause + "date(date_time) <= " + "'" + value + "'";
+            clause = ") AND (";
+
+        } else if(key == "code"){
+            new_values = value.split(",");
+            for(i=0; i<new_values.length; i++){
+                query = query + clause + "code = " + new_values[i];
+                clause = " OR ";
+            }
+            clause = ") AND ("
+        } else if(key == "grid"){
+            new_values = value.split(",");
+            for(i=0; i<new_values.length; i++){
+                query = query + clause + "police_grid = " + new_values[i];
+                clause = " OR ";
+            }
+            clause = ") AND ("
+        } else if(key == "neighborhood"){
+            new_values = value.split(",");
+            for(i=0; i<new_values.length; i++){
+                query = query + clause + "neighborhood_number = " +  new_values[i];
+                clause = " OR ";
+            }
+        } else if(key == "limit"){
+            limit = value;
+        }
+        
+    }
+
     
-    res.status(200).type('json').send({}); // <-- you will need to change this
+    query = query + ") ORDER BY date_time ASC LIMIT " + limit;
+    //query = "SELECT * FROM incidents where date(date_time) > '2022-01-02' ORDER BY date_time ASC LIMIT 15";
+    console.log(query);
+    databaseSelect(query, [])
+    .then((data) => {
+        console.log(data);
+        res.status(200).type('json').send(data); 
+    })
+    .catch((err) => {
+        res.status(200).type('html').send(err); // <-- you will need to change this
+        //res.status(200).type('html').send("Make sure that your requested neighborhoods are in csv format. (E.g: ?codes=5,8,10"); // <-- you will need to change this
+    })
 });
 
 // PUT request handler for new crime incident
