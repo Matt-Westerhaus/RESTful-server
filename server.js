@@ -6,9 +6,10 @@ let path = require('path');
 let express = require('express');
 let sqlite3 = require('sqlite3');
 const { query } = require('express');
+const e = require('express');
 
 
-let db_filename = path.join(__dirname, 'db', 'stpaul_crime.sqlite3');
+let db_filename = path.join(__dirname, 'db', 'stpaul_crime_copy.sqlite3');
 
 let app = express();
 let port = 8000;
@@ -81,7 +82,7 @@ app.get('/neighborhoods', (req, res) => {
 
 // GET request handler for crime incidents
 app.get('/incidents', (req, res) => {
-    console.log(req.query); // query object 
+    console.log(req.query); 
     let query = "SELECT case_number, SUBSTRING(date_time,1,10) AS date, SUBSTRING(date_time,12,19) AS time, code, incident, police_grid, neighborhood_number, block FROM incidents";
     let limit = 50;
     let clause = " WHERE (";
@@ -142,42 +143,47 @@ app.get('/incidents', (req, res) => {
 });
 
 
-//TODO STILL: 2 FUNCTIONS BELOW 
-
-
 // PUT request handler for new crime incident
 app.put('/new-incident', (req, res) => {
-    console.log(req.body); // uploaded data
+    console.log(req.body); 
+    let query = 'INSERT INTO incidents VALUES (?, ?, ?, ?, ?, ?, ?);';
+    let date_time = req.body.date + "T" + req.body.time;
+    let parameters = [req.body.case_number, date_time, req.body.code, req.body.incident, req.body.police_grid, req.body.neighborhood_number, req.body.block];
 
-    let query = "INSERT INTO incidents (case_number, date_time, code, incident, police_grid, neighborhood_number, block) \
-    VALUES (CASE_NUMBER, *DATE+TIME*, CODE, INCIDENT, POLICE_GRID, NEIGHBORHOOD_NUMBER, BLOCK) ";
-
-    databaseRun(query, []) 
+    databaseRun(query, parameters)
     .then((data) => {
-        res.status(200).type('txt').send('Success'); // <-- you may need to change this
+        res.status(200).type('txt').send('Success'); 
     })
     .catch((err) => {
-        res.status(500).type('txt').send('Error: Already in Database'); // <-- you may need to change this
+        res.status(500).type('txt').send("This case number is already present in the database, please upload a different case."); 
     })
 });
+
+
 
 // DELETE request handler for crime incident
 app.delete('/remove-incident', (req, res) => {
-    console.log(req.body); // uploaded data
-    let query = "DELETE FROM incidents WHERE case_number = CASE_NUMBER_INPUT";
-
-    databaseRun(query, []) 
+    console.log(req.body); 
+    let query = "DELETE FROM incidents WHERE case_number = ?";
+    databaseSelect("SELECT COUNT(*) AS count from incidents WHERE case_number = ?", [req.body.case_number])
     .then((data) => {
-        res.status(200).type('txt').send('Success'); // <-- you may need to change this
+        if(data[0].count == 0) {
+            throw "Case doesn't exist";
+        } 
+        databaseRun(query, [req.body.case_number]) 
+        .then(() =>{
+            res.status(200).type('txt').send('Success'); 
+        })
     })
     .catch((err) => {
-        res.status(500).type('txt').send('Error: case number does not exist in the database'); // <-- you may need to change this
+        res.status(500).type('txt').send('Error: Case number does not exist in the database, please select a different case to delete.');
     })
+
+    
 });
 
 
 
-//Promise version of db.all
 // Create Promise for SQLite3 database SELECT query 
 function databaseSelect(query, params) {
     return new Promise((resolve, reject) => {
