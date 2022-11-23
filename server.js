@@ -152,6 +152,21 @@ app.put('/new-incident', (req, res) => {
     let query = "INSERT INTO incidents (case_number, date_time, code, incident, police_grid, neighborhood_number, block) \
     VALUES (CASE_NUMBER, *DATE+TIME*, CODE, INCIDENT, POLICE_GRID, NEIGHBORHOOD_NUMBER, BLOCK) ";
 
+    //let values = req.split(',');
+    
+    
+    query = query.replace('CASE_NUMBER', req.body['case_number']);
+    query = query.replace('*DATE+TIME*', req.body['date_time']);
+    query = query.replace('CODE', req.body['code']);
+    query = query.replace('INCIDENT', req.body['incident']);
+    query = query.replace('POLICE_GRID', req.body['police_grid']);
+    query = query.replace('NEIGHBORHOOD_NUMBER', req.body['neighborhood_number']);
+    query = query.replace('BLOCK', req.body['block']);
+    console.log(query);
+
+    
+    
+    
     databaseRun(query, []) 
     .then((data) => {
         res.status(200).type('txt').send('Success'); // <-- you may need to change this
