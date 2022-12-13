@@ -1,6 +1,7 @@
 // Built-in Node.js modules
 let fs = require('fs');
 let path = require('path');
+let cors = require('cors');
 
 // NPM modules
 let express = require('express');
@@ -9,14 +10,15 @@ const { query } = require('express');
 const e = require('express');
 
 
-let db_filename = path.join(__dirname, 'db', 'stpaul_crime_copy.sqlite3');
+let db_filename = path.join(__dirname, 'db', 'stpaul_crime.sqlite3');
 
 let app = express();
-let port = 8000;
+let port = 8001;
 
 
 //express will automatically parse parameters
 app.use(express.json());
+app.use(cors());
 
 // Open SQLite3 database (in read-write mode)
 let db = new sqlite3.Database(db_filename, sqlite3.OPEN_READWRITE, (err) => {
@@ -128,7 +130,7 @@ app.get('/incidents', (req, res) => {
     }
 
     if((clause == " WHERE (" && req.query.hasOwnProperty("limit")) || clause == " WHERE (") {
-        query = "SELECT case_number, SUBSTRING(date_time,1,10) AS date, SUBSTRING(date_time,12,19) AS time, code, incident, police_grid, neighborhood_number, block FROM incidents ORDER BY date ASC, time LIMIT " + limit;
+        query = "SELECT case_number, SUBSTRING(date_time,1,10) AS date, SUBSTRING(date_time,12,19) AS time, code, incident, police_grid, neighborhood_number, block FROM incidents ORDER BY date DESC, time DESC LIMIT " + limit;
     } else {
         query = query + ") ORDER BY date ASC, time LIMIT " + limit;
     }    
@@ -138,7 +140,7 @@ app.get('/incidents', (req, res) => {
         res.status(200).type('json').send(data); 
     })
     .catch((err) => {
-        res.status(500).type('html').send("Make sure that your requested parameyers are in csv format. (E.g: ?code=5,8,10)"); 
+        res.status(500).type('html').send("Make sure that your requested parameters are in csv format. (E.g: ?code=5,8,10)"); 
     })
 });
 
