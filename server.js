@@ -1,6 +1,7 @@
 // Built-in Node.js modules
 let fs = require('fs');
 let path = require('path');
+let cors = require('cors');
 
 // NPM modules
 let express = require('express');
@@ -12,11 +13,12 @@ const e = require('express');
 let db_filename = path.join(__dirname, 'db', 'stpaul_crime_copy.sqlite3');
 
 let app = express();
-let port = 8000;
+let port = 8001;
 
 
 //express will automatically parse parameters
 app.use(express.json());
+app.use(cors());
 
 // Open SQLite3 database (in read-write mode)
 let db = new sqlite3.Database(db_filename, sqlite3.OPEN_READWRITE, (err) => {
