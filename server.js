@@ -130,7 +130,7 @@ app.get('/incidents', (req, res) => {
     }
 
     if((clause == " WHERE (" && req.query.hasOwnProperty("limit")) || clause == " WHERE (") {
-        query = "SELECT case_number, SUBSTRING(date_time,1,10) AS date, SUBSTRING(date_time,12,19) AS time, code, incident, police_grid, neighborhood_number, block FROM incidents ORDER BY date ASC, time LIMIT " + limit;
+        query = "SELECT case_number, SUBSTRING(date_time,1,10) AS date, SUBSTRING(date_time,12,19) AS time, code, incident, police_grid, neighborhood_number, block FROM incidents ORDER BY date DESC, time DESC LIMIT " + limit;
     } else {
         query = query + ") ORDER BY date ASC, time LIMIT " + limit;
     }    
