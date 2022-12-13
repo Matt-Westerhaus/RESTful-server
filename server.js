@@ -10,7 +10,7 @@ const { query } = require('express');
 const e = require('express');
 
 
-let db_filename = path.join(__dirname, 'db', 'stpaul_crime_copy.sqlite3');
+let db_filename = path.join(__dirname, 'db', 'stpaul_crime.sqlite3');
 
 let app = express();
 let port = 8001;
@@ -140,7 +140,7 @@ app.get('/incidents', (req, res) => {
         res.status(200).type('json').send(data); 
     })
     .catch((err) => {
-        res.status(500).type('html').send("Make sure that your requested parameyers are in csv format. (E.g: ?code=5,8,10)"); 
+        res.status(500).type('html').send("Make sure that your requested parameters are in csv format. (E.g: ?code=5,8,10)"); 
     })
 });
 
