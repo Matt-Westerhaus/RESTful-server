@@ -86,7 +86,7 @@ app.get('/neighborhoods', (req, res) => {
 app.get('/incidents', (req, res) => {
     console.log(req.query); 
     let query = "SELECT case_number, SUBSTRING(date_time,1,10) AS date, SUBSTRING(date_time,12,19) AS time, code, incident, police_grid, neighborhood_number, block FROM incidents";
-    let limit = 50;
+    let limit = 1000;
     let clause = " WHERE (";
     let new_values
     let i;
