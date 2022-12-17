@@ -9,6 +9,7 @@ let sqlite3 = require('sqlite3');
 const { query } = require('express');
 const e = require('express');
 
+let public_dir = path.join(__dirname, 'public');
 
 let db_filename = path.join(__dirname, 'db', 'stpaul_crime.sqlite3');
 
@@ -19,6 +20,7 @@ let port = 8001;
 //express will automatically parse parameters
 app.use(express.json());
 app.use(cors());
+app.use(express.static(public_dir)); //give public 
 
 // Open SQLite3 database (in read-write mode)
 let db = new sqlite3.Database(db_filename, sqlite3.OPEN_READWRITE, (err) => {
@@ -86,7 +88,7 @@ app.get('/neighborhoods', (req, res) => {
 app.get('/incidents', (req, res) => {
     console.log(req.query); 
     let query = "SELECT case_number, SUBSTRING(date_time,1,10) AS date, SUBSTRING(date_time,12,19) AS time, code, incident, police_grid, neighborhood_number, block FROM incidents";
-    let limit = 50;
+    let limit = 1000;
     let clause = " WHERE (";
     let new_values
     let i;
