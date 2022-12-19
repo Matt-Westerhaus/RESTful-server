@@ -14,7 +14,7 @@ let public_dir = path.join(__dirname, 'public');
 let db_filename = path.join(__dirname, 'db', 'stpaul_crime.sqlite3');
 
 let app = express();
-let port = 8001;
+let port = 8000;
 
 
 //express will automatically parse parameters
